@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Сокращение URL</h1>
+
+    {{ form_start(form) }}
+    {{ form_row(form.longUrl) }}
+
+    <button type="submit" class="btn btn-primary">Сократить URL</button>
+    {{ form_end(form) }}
+{% endblock %}
