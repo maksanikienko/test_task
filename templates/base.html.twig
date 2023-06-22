@@ -26,10 +26,18 @@
     </head>
     
     <body>
+    <header class="bg-dark"> 
+            <div class="container"> 
+                {% include '/front/sections/header.html.twig' %}
+            </div>
+        </header>
     <div class="container mt-5 mb-5">
-        {% block body %}
-     
-       {% endblock %}
+        {% block body %}{% endblock %}
           </div>
+          <footer class="bg-dark">
+            <div class="text-white container pt-5">
+                {% include '/front/sections/footer.html.twig' %}
+            </div>
+        </footer>
     </body>
 </html>

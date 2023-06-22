@@ -1,0 +1,51 @@
+<!-- header.html.twig -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Slice</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark ">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('index') }}">Home</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" >About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" >Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_login') }}">Login</a>
+                </li>
+            </ul>
+        </div>
+         <div class="col-4">
+                <div class="d-flex align-items-center justify-content-end">
+                    {% if app.user %}
+                        <div class="text-light me-3">Вы вошли как <b>{{ app.user.email }}</b></div>
+                        <a class="btn rounded-pill bg-light text-black" href="{{ path('app_logout') }}">Выйти</a>
+                    {% else %}
+                        <a class="btn rounded-pill bg-light text-black" href="{{ path('app_login') }}">Войти</a>
+                    {% endif %}
+                </div>
+            </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

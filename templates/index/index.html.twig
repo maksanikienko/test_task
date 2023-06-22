@@ -12,15 +12,10 @@
         <h1 class="text-center">Сокращение ссылок</h1>
         <form action="/shorten" method="POST">
             <div class="mb-3">
-                <input type="text" name="url" class="form-control" placeholder="Введите URL для сокращения" required>
+                <input type="text" name="longUrl" class="form-control" placeholder="Введите URL для сокращения" required>
             </div>
             <button type="submit" class="btn btn-primary">Сократить</button>
         </form>
-        {% if shortenedUrl is defined %}
-            <div class="mt-4 text-center">
-                <p>Сокращенная ссылка: <a href="{{ shortenedUrl }}" target="_blank">{{ shortenedUrl }}</a></p>
-            </div>
-        {% endif %}
     </div>
 </body>
 </html>

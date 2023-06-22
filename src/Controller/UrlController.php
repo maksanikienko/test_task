@@ -12,13 +12,19 @@ use Symfony\Component\Validator\Constraints\Url;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\UrlMapping;
 
-class UrlShortenerController extends AbstractController
+class UrlController extends AbstractController
 {
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
     #[Route('/shorten', name: 'app_shorten', methods: [ 'POST'])]
     public function shorten(Request $request, EntityManagerInterface $entityManager)
     {
         // Получение длинного URL из тела запроса
-        $longUrl = $request->request->get('long_url');
+        $longUrl = $request->request->get('longUrl');
 
         // Проверка валидности длинного URL
         $validator = Validation::createValidator();
@@ -34,7 +40,7 @@ class UrlShortenerController extends AbstractController
 
         if ($urlMapping) {
             // Если запись уже существует, возвращаем короткий URL
-            $shortUrl = $this->generateShortUrl($urlMapping->getShortCode());
+           $shortUrl = $this->generateShortUrl($urlMapping->getShortCode());
         } else {
             // Создаем новую запись и генерируем короткий код
             // Генерируем уникальный короткий код
@@ -54,12 +60,15 @@ class UrlShortenerController extends AbstractController
         }
 
         // Возвращаем короткий URL
-        return new Response($shortUrl, Response::HTTP_CREATED);
+        return $this->render('index/shortUrl.html.twig', [
+            'shortUrl' => $shortUrl,
+        ]);
     }
 
     #[Route('/{shortCode}', name: 'app_redirect', methods: ['GET'])]
     public function redirectLink(Request $request, string $shortCode, EntityManagerInterface $entityManager)
     {
+        $shortCode = $request->get('shortCode');
         // Ищем запись в базе данных по короткому коду
         $urlMapping = $entityManager->getRepository(UrlMapping::class)->findOneBy(['shortCode' => $shortCode]);
 
@@ -75,12 +84,17 @@ class UrlShortenerController extends AbstractController
     /**
      * Генерация уникального короткого кода
      */
-    private function generateShortCode()
+    private function generateShortCode($length = 10)
     {
-        // Логика генерации случайного короткого кода, например, с использованием базовой кодировки или алгоритмов хэширования
-        // ...
-
-        return 'generated_short_code'; // Замените на фактическую генерацию кода
+        $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $shortCode = '';
+    
+    $max = strlen($characters) - 1;
+    for ($i = 0; $i < $length; $i++) {
+        $shortCode .= $characters[random_int(0, $max)];
+    }
+    
+    return $shortCode;
     }
 
     /**
@@ -88,9 +102,16 @@ class UrlShortenerController extends AbstractController
      */
     private function generateShortUrl(string $shortCode)
     {
+        
         // Замените 'your_app_base_url' на базовый URL вашего приложения
-        return 'your_app_base_url/' . $shortCode;
+        //$request->getSchemeAndHttpHost()
+        return "myLink" . $shortCode;
     }
+
+
+
+
+    
 
     #[Route('/create-url-mapping', name: 'create_url', methods: ['GET', 'POST'])]
     public function createUrlMapping(Request $request, UrlMappingRepository $urlMappingRepository)

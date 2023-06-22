@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+{% if shortUrl is defined %}
+    <div class="mt-4 text-center">
+        <p>Сокращенная ссылка: <a href="{{ shortUrl }}" target="_blank">{{ 'myUrl' }}</a></p>
+    </div>
+{% endif %}
+{% endblock %}
