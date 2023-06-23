@@ -22,17 +22,13 @@ class RegistrationFormType extends AbstractType
             'label' => 'Email',
             ])
             ->add('password', RepeatedType::class, [
-                'label' => 'Password',
                 'type' => PasswordType::class,
-                'constraints' => [
-                    new NotBlank(),
-                    new Length(min: 8),
-                ],
                 'invalid_message' => 'The password fields must match.',
+                'required' => true,
                 'first_options' => ['label' => 'Password'],
-                'second_options' => ['label' => 'Repeat Password']
-            ])
-        ;
+                'second_options' => ['label' => 'Repeat Password'],
+            ]);
+        
     }
 
     public function configureOptions(OptionsResolver $resolver): void

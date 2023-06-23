@@ -2,7 +2,7 @@
 {% block body %}
 {% if shortUrl is defined %}
     <div class="mt-4 text-center">
-        <p>Сокращенная ссылка: <a href="{{ shortUrl }}" target="_blank">{{ 'myUrl' }}</a></p>
+        <p>Сокращенная ссылка: <a href="{{ shortUrl|raw }}">{{ shortUrl|raw }}</a></p>
     </div>
 {% endif %}
 {% endblock %}

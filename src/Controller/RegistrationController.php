@@ -38,18 +38,19 @@ class RegistrationController extends AbstractController
     ): Response
     {
         $user = new User();
-        $user->setRoles(['ROLE_ADMIN']);
+        
+        $user->setRoles(['ROLE_USER']);
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // encode the plain password
+            
             $user->setPassword(
-                
+                $userPasswordHasher->hashPassword(
+                    $user,
                     $form->get('password')->getData()
-                
-            );
-
+                )
+                );
             $entityManager->persist($user);
             $entityManager->flush();
 

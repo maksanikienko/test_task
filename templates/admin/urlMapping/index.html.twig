@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    {% block title %}Links{% endblock %}
+</head>
+
+    <h1>Links</h1>
+    <ul>
+        {% for url in allUrl %}
+           <li><a href="{{ url.longUrl}}" class="text-dark"> {{ url.longUrl }}</a></li>
+           <p>Количество кликов: {{ url.getClickCount() }}</p>
+        {% endfor %}
+    </ul>
+    {#<a href="{{ path('click_count', { 'id': url.id }) }}">{{ 'url.longUrl' }}</a>#}
+
+    {% endblock %}
+
+
+

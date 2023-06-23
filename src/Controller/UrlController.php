@@ -11,20 +11,16 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Url;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\UrlMapping;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class UrlController extends AbstractController
 {
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
     #[Route('/shorten', name: 'app_shorten', methods: [ 'POST'])]
     public function shorten(Request $request, EntityManagerInterface $entityManager)
     {
         // Получение длинного URL из тела запроса
         $longUrl = $request->request->get('longUrl');
+        
 
         // Проверка валидности длинного URL
         $validator = Validation::createValidator();
@@ -37,9 +33,10 @@ class UrlController extends AbstractController
 
         // Проверяем, существует ли уже запись для данного длинного URL
         $urlMapping = $entityManager->getRepository(UrlMapping::class)->findOneBy(['longUrl' => $longUrl]);
-
+    
         if ($urlMapping) {
             // Если запись уже существует, возвращаем короткий URL
+            
            $shortUrl = $this->generateShortUrl($urlMapping->getShortCode());
         } else {
             // Создаем новую запись и генерируем короткий код
@@ -56,7 +53,7 @@ class UrlController extends AbstractController
             $entityManager->flush();
 
             // Формируем короткий URL на основе базового URL вашего приложения и сгенерированного кода
-            $shortUrl = $this->generateShortUrl($shortCode);
+            $shortUrl = $this->generateShortUrl( $shortCode);
         }
 
         // Возвращаем короткий URL
@@ -65,25 +62,27 @@ class UrlController extends AbstractController
         ]);
     }
 
-    #[Route('/{shortCode}', name: 'app_redirect', methods: ['GET'])]
+    #[Route('/go-{shortCode}', name: 'app_redirect', methods: ['GET'])]
     public function redirectLink(Request $request, string $shortCode, EntityManagerInterface $entityManager)
     {
         $shortCode = $request->get('shortCode');
-        // Ищем запись в базе данных по короткому коду
+        
         $urlMapping = $entityManager->getRepository(UrlMapping::class)->findOneBy(['shortCode' => $shortCode]);
 
         if ($urlMapping) {
-            // Если запись найдена, перенаправляем пользователя по длинному URL
+            $clicks = $urlMapping->getClickCount() ?? 0;
+            $urlMapping->setClickCount($clicks + 1);
+
+            $entityManager->persist($urlMapping);
+            $entityManager->flush();
+
             return $this->redirect($urlMapping->getLongUrl());
         }
 
-        // Если запись не найдена, возвращаем ошибку
+        
         return new Response('Страница не найдена', Response::HTTP_NOT_FOUND);
     }
 
-    /**
-     * Генерация уникального короткого кода
-     */
     private function generateShortCode($length = 10)
     {
         $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -97,47 +96,24 @@ class UrlController extends AbstractController
     return $shortCode;
     }
 
-    /**
-     * Формирование короткого URL на основе базового URL вашего приложения и короткого кода
-     */
+    
     private function generateShortUrl(string $shortCode)
     {
         
-        // Замените 'your_app_base_url' на базовый URL вашего приложения
-        //$request->getSchemeAndHttpHost()
-        return "myLink" . $shortCode;
+        
+        return $this->generateUrl('app_redirect',['shortCode' => $shortCode], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
-
-
-
-    
-
-    #[Route('/create-url-mapping', name: 'create_url', methods: ['GET', 'POST'])]
-    public function createUrlMapping(Request $request, UrlMappingRepository $urlMappingRepository)
+    //выводит все ссылки для admin пользователя
+    #[Route('/url', name: 'url_show', methods: ['GET'])] 
+    public function getAllUrl(UrlMappingRepository $urlMappingRepository)
     {
-        $urlMapping = new UrlMapping();
-
-        $form = $this->createForm(UrlMappingFormType::class, $urlMapping);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $urlMappingRepository->save($urlMapping, true);
-
-            return $this->redirectToRoute('url_mapping_success');
-        }
-
-        return $this->render('url_mapping/create.html.twig', [
-            'form' => $form->createView(),
+        return $this->render('admin/urlMapping/index.html.twig', [
+            'allUrl' => $urlMappingRepository->findAll(),
         ]);
     }
 
-    /**
-     * @Route("/url-mapping/success", name="url_mapping_success")
-     */
-    #[Route('/url-mapping/success', name: 'url_mapping_success')]
-    public function success()
-    {
-        return $this->render('url_mapping/success.html.twig');
-    }
+    
+   
+    
 }

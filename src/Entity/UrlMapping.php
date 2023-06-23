@@ -18,7 +18,10 @@ class UrlMapping
     private ?string $longUrl = null;
 
     #[ORM\Column(length: 10,unique:true)]
-    private ?string $shortCode = null; 
+    private ?string $shortCode = null;
+
+    #[ORM\Column(nullable:true)]
+    private ?int $clickCount = 0; 
 
     public function getId(): ?int
     {
@@ -45,6 +48,18 @@ class UrlMapping
     public function setShortCode(string $shortCode): static
     {
         $this->shortCode = $shortCode;
+
+        return $this;
+    }
+
+    public function getClickCount(): ?int
+    {
+        return $this->clickCount;
+    }
+
+    public function setClickCount(int $clickCount): static
+    {
+        $this->clickCount = $clickCount;
 
         return $this;
     }
