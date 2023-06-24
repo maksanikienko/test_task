@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Url;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\UrlMapping;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class UrlController extends AbstractController
@@ -57,24 +58,37 @@ class UrlController extends AbstractController
         }
 
         // Возвращаем короткий URL
-        return $this->render('index/shortUrl.html.twig', [
+        // return $this->render('index/shortUrl.html.twig', [
+            // 'shortUrl' => $shortUrl,
+        // ]);
+
+        return new JsonResponse([
             'shortUrl' => $shortUrl,
         ]);
     }
 
+    #[Route('/success', name: 'app_success', methods: ['GET'])]
+    public function success(Request $reguest) {
+         return $this->render('index/shortUrl.html.twig', [
+            'shortUrl' => $reguest->get('link'),
+        ]);
+    }
+    
     #[Route('/go-{shortCode}', name: 'app_redirect', methods: ['GET'])]
-    public function redirectLink(Request $request, string $shortCode, EntityManagerInterface $entityManager)
+    public function redirectLink(Request $request, string $shortCode, UrlMappingRepository $urlMappingRepository)
     {
         $shortCode = $request->get('shortCode');
         
-        $urlMapping = $entityManager->getRepository(UrlMapping::class)->findOneBy(['shortCode' => $shortCode]);
-
+        // $urlMapping = $entityManager->getRepository(UrlMapping::class)->findOneBy(['shortCode' => $shortCode]);
+        $urlMapping = $urlMappingRepository->findOneBy(['shortCode' => $shortCode]);
         if ($urlMapping) {
             $clicks = $urlMapping->getClickCount() ?? 0;
             $urlMapping->setClickCount($clicks + 1);
 
-            $entityManager->persist($urlMapping);
-            $entityManager->flush();
+            // $entityManager->persist($urlMapping);
+            // $entityManager->flush();
+
+            $urlMappingRepository->save($urlMapping, true);
 
             return $this->redirect($urlMapping->getLongUrl());
         }
@@ -108,6 +122,7 @@ class UrlController extends AbstractController
     #[Route('/url', name: 'url_show', methods: ['GET'])] 
     public function getAllUrl(UrlMappingRepository $urlMappingRepository)
     {
+        
         return $this->render('admin/urlMapping/index.html.twig', [
             'allUrl' => $urlMappingRepository->findAll(),
         ]);

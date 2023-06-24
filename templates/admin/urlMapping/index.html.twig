@@ -9,7 +9,7 @@
     <h1>Links</h1>
     <ul>
         {% for url in allUrl %}
-           <li><a href="{{ url.longUrl}}" class="text-dark"> {{ url.longUrl }}</a></li>
+           <li><a href="{{ path('app_redirect', {'shortCode': url.shortCode}) }}" class="text-dark"> {{ url.longUrl }}</a></li>
            <p>Количество кликов: {{ url.getClickCount() }}</p>
         {% endfor %}
     </ul>

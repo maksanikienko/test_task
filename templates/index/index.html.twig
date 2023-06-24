@@ -1,23 +1,10 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сокращение ссылок</title>
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-center">Сокращение ссылок</h1>
-        <form action="/shorten" method="POST">
-            <div class="mb-3">
-                <input type="text" name="longUrl" class="form-control" placeholder="Введите URL для сокращения" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Сократить</button>
-        </form>
+<h1 class="text-center">Сокращение ссылок</h1>
+<form action="/shorten" method="POST" id="shorten">
+    <div class="mb-3">
+        <input type="text" name="longUrl" class="form-control" placeholder="Введите URL для сокращения" required>
     </div>
-</body>
-</html>
-
+    <button type="submit" class="btn btn-primary">Сократить</button>
+</form>
 {% endblock %}
