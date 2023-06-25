@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -27,6 +29,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean', nullable: true)]
     private $isVerified = false;
+
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: UrlMapping::class)]
+    private Collection $UrlMapping;
+
+    public function __construct()
+    {
+        $this->UrlMapping = new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -92,7 +103,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials()
     {
         
-        $this->password = null;
+      
+    }
+
+    /**
+     * @return Collection<int, UrlMapping>
+     */
+    public function getUrlMapping(): Collection
+    {
+        return $this->UrlMapping;
+    }
+
+    public function addUrlMapping(UrlMapping $urlMapping): static
+    {
+        if (!$this->UrlMapping->contains($urlMapping)) {
+            $this->UrlMapping->add($urlMapping);
+            $urlMapping->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUrlMapping(UrlMapping $urlMapping): static
+    {
+        if ($this->UrlMapping->removeElement($urlMapping)) {
+            // set the owning side to null (unless already changed)
+            if ($urlMapping->getClient() === $this) {
+                $urlMapping->setClient(null);
+            }
+        }
+
+        return $this;
     }
 
     

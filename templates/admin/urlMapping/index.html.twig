@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
-    {% block title %}Links{% endblock %}
+    {% block title %}{% endblock %}
 </head>
 
     <h1>Links</h1>
@@ -13,7 +13,6 @@
            <p>Количество кликов: {{ url.getClickCount() }}</p>
         {% endfor %}
     </ul>
-    {#<a href="{{ path('click_count', { 'id': url.id }) }}">{{ 'url.longUrl' }}</a>#}
 
     {% endblock %}
 

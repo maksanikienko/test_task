@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Ссылки пользователя</h1>
+
+    
+        <ul>
+
+        {% for url in userUrl %}
+           <li><a href="{{ path('app_redirect', {'shortCode': url.shortCode}) }}" class="text-dark"> {{ url.longUrl }}</a></li>
+          <p>Количество кликов: {{ url.getClickCount() }}</p>
+        {% endfor %}
+           
+        </ul>
+   
+{% endblock %}

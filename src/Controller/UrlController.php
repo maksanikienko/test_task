@@ -11,14 +11,19 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Url;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\UrlMapping;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+
 
 class UrlController extends AbstractController
 {
     #[Route('/shorten', name: 'app_shorten', methods: [ 'POST'])]
-    public function shorten(Request $request, EntityManagerInterface $entityManager)
+    public function shorten(Request $request, EntityManagerInterface $entityManager,TokenStorageInterface $tokenStorage)
     {
+
+       
         // Получение длинного URL из тела запроса
         $longUrl = $request->request->get('longUrl');
         
@@ -42,12 +47,17 @@ class UrlController extends AbstractController
         } else {
             // Создаем новую запись и генерируем короткий код
             // Генерируем уникальный короткий код
-            $shortCode = $this->generateShortCode();
+            $shortCode = $this->generateShortCode();   
+
+            $token = $tokenStorage->getToken();
+            $currentUser = $token->getUser();
+
 
             // Создаем новую запись в базе данных
             $urlMapping = new UrlMapping();
             $urlMapping->setLongUrl($longUrl);
             $urlMapping->setShortCode($shortCode);
+            $urlMapping->setClient($currentUser);
 
             // Сохраняем запись в базе данных
             $entityManager->persist($urlMapping);
@@ -56,11 +66,6 @@ class UrlController extends AbstractController
             // Формируем короткий URL на основе базового URL вашего приложения и сгенерированного кода
             $shortUrl = $this->generateShortUrl( $shortCode);
         }
-
-        // Возвращаем короткий URL
-        // return $this->render('index/shortUrl.html.twig', [
-            // 'shortUrl' => $shortUrl,
-        // ]);
 
         return new JsonResponse([
             'shortUrl' => $shortUrl,
@@ -122,12 +127,27 @@ class UrlController extends AbstractController
     #[Route('/url', name: 'url_show', methods: ['GET'])] 
     public function getAllUrl(UrlMappingRepository $urlMappingRepository)
     {
-        
+
         return $this->render('admin/urlMapping/index.html.twig', [
             'allUrl' => $urlMappingRepository->findAll(),
         ]);
     }
+    //выводит ссылки для user пользователя
+    
+    #[Route('/url-user', name: 'url_show_user', methods: ['GET'])] 
+   public function userUrl()
+   {
+       // Получаем текущего пользователя
+       /** @var User $user */
+       $user = $this->getUser();
+       $url = $user ->getUrlMapping();
 
+           // Возвращаем ответ с отображением ссылок
+           return $this->render('index/currentUserUrl.html.twig', [
+               'userUrl' => $url,
+           ]);
+      
+   }
     
    
     

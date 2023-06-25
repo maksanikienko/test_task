@@ -24,22 +24,33 @@
                 <li class="nav-item">
                     <a class="nav-link" >Contact</a>
                 </li>
+                {% if app.user is not null and 'ROLE_ADMIN' in app.user.roles %}
                  <li class="nav-item">
                     <a class="nav-link" href="{{ path('url_show') }}">Url</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_login') }}">Login</a>
+                    <a class="nav-link" href="{{ path('app_user_index') }}">Admin Panel</a>
                 </li>
+                {% endif %}
+                {% if app.user %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('url_show_user') }}">Url</a>
+                </li>
+                    {% endif %}
+                
             </ul>
         </div>
          <div class="col-4">
                 <div class="d-flex align-items-center justify-content-end">
                     {% if app.user %}
                         <div class="text-light me-3">Вы вошли как <b>{{ app.user.email }}</b></div>
-                        <a class="btn rounded-pill bg-light text-black" href="{{ path('app_logout') }}">Выйти</a>
+                        <a class="btn rounded-pill bg-light text-black" href="{{ path('app_logout') }}">Logout</a>
                     {% else %}
-                        <a class="btn rounded-pill bg-light text-black" href="{{ path('app_login') }}">Войти</a>
+                        <a class="btn rounded-pill bg-light text-black" href="{{ path('app_login') }}">Login</a>
                     {% endif %}
+                    
+                   
+
                 </div>
             </div>
     </div>

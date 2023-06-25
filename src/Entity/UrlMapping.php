@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UrlMappingRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UrlMappingRepository::class)]
@@ -21,7 +23,11 @@ class UrlMapping
     private ?string $shortCode = null;
 
     #[ORM\Column(nullable:true)]
-    private ?int $clickCount = 0; 
+    private ?int $clickCount = 0;
+
+    #[ORM\ManyToOne(inversedBy: 'UrlMapping')]
+    private ?User $client = null;
+
 
     public function getId(): ?int
     {
@@ -60,6 +66,18 @@ class UrlMapping
     public function setClickCount(int $clickCount): static
     {
         $this->clickCount = $clickCount;
+
+        return $this;
+    }
+
+    public function getClient(): ?User
+    {
+        return $this->client;
+    }
+
+    public function setClient(?User $client): static
+    {
+        $this->client = $client;
 
         return $this;
     }
