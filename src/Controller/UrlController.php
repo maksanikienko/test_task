@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\UrlMappingRepository;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,7 +20,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class UrlController extends AbstractController
 {
-    #[Route('/shorten', name: 'app_shorten', methods: ['POST'])]
+    #[Route('/user/shorten', name: 'app_shorten', methods: ['POST'])]
     public function shorten(Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage)
     {
         if (!$this->getUser()) {
@@ -62,7 +64,7 @@ class UrlController extends AbstractController
     }
 
     #[Route('/success', name: 'app_success', methods: ['GET'])]
-    public function success(Request $reguest)
+    public function success(Request $reguest): Response
     {
         return $this->render('index/shortUrl.html.twig', [
             'shortUrl' => $reguest->get('link'),
@@ -70,7 +72,7 @@ class UrlController extends AbstractController
     }
 
     #[Route('/go-{shortCode}', name: 'app_redirect', methods: ['GET'])]
-    public function redirectLink(Request $request, string $shortCode, UrlMappingRepository $urlMappingRepository)
+    public function redirectLink(Request $request, string $shortCode, UrlMappingRepository $urlMappingRepository): RedirectResponse|Response
     {
         $shortCode = $request->get('shortCode');
 
@@ -88,7 +90,7 @@ class UrlController extends AbstractController
         return new Response('Страница не найдена', Response::HTTP_NOT_FOUND);
     }
 
-    private function generateShortCode($length = 10)
+    private function generateShortCode($length = 10): string
     {
         $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $shortCode = '';
@@ -101,27 +103,24 @@ class UrlController extends AbstractController
         return $shortCode;
     }
 
-
-    private function generateShortUrl(string $shortCode)
+    private function generateShortUrl(string $shortCode): string
     {
-
-
         return $this->generateUrl('app_redirect', ['shortCode' => $shortCode], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
     //выводит все ссылки для admin пользователя
-    #[Route('/url', name: 'url_show', methods: ['GET'])]
-    public function getAllUrl(UrlMappingRepository $urlMappingRepository)
+    #[Route('/admin/url', name: 'url_show', methods: ['GET'])]
+    public function getAllUrl(UrlMappingRepository $urlMappingRepository): Response
     {
-
         return $this->render('admin/urlMapping/index.html.twig', [
             'allUrl' => $urlMappingRepository->findAll(),
         ]);
     }
+
     //выводит ссылки для user пользователя
 
-    #[Route('/url-user', name: 'url_show_user', methods: ['GET'])]
-    public function userUrl()
+    #[Route('/api/current-user/links', name: 'url_show_user', methods: ['GET'])]
+    public function userUrl(): JsonResponse
     {
         // Получаем текущего пользователя
         /** @var User $user */
@@ -129,5 +128,12 @@ class UrlController extends AbstractController
         $links = $user->getUrlMapping();
 
         return $this->json(['links' => $links,], context: ['groups' => ['api']]);
+    }
+
+
+    #[Route('/user/links', name: 'contact')]
+    public function contact(): Response
+    {
+        return $this->render('index/currentUserUrl.html.twig');
     }
 }
