@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="MyProject">
+    <description>PSR-12 coding standard</description>
+
+    <file>./home/max/Projects/test_task/src</file>
+
+    <rule ref="PSR12"/>
+
+    <arg name="extensions" value="php"/>
+    <arg name="encoding" value="utf-8"/>
+</ruleset>

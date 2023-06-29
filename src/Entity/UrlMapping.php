@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UrlMappingRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UrlMappingRepository::class)]
 #[ORM\Table(name:"url_mappings")]
@@ -12,14 +13,17 @@ class UrlMapping
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy:"AUTO")]
     #[ORM\Column]
+    #[Groups(['api'])]
     private ?int $id = null;
 
+    #[Groups(['api'])]
     #[ORM\Column(length: 255)]
     private ?string $longUrl = null;
 
     #[ORM\Column(length: 10,unique:true)]
     private ?string $shortCode = null;
 
+    #[Groups(['api'])]
     #[ORM\Column(nullable:true)]
     private ?int $clickCount = 0;
 

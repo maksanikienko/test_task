@@ -18,12 +18,15 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class UrlController extends AbstractController
 {
-    #[Route('/shorten', name: 'app_shorten', methods: [ 'POST'])]
-    public function shorten(Request $request, EntityManagerInterface $entityManager,TokenStorageInterface $tokenStorage)
+    #[Route('/shorten', name: 'app_shorten', methods: ['POST'])]
+    public function shorten(Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage)
     {
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('app_login');
+        }
 
         $longUrl = $request->request->get('longUrl');
-        
+
 
         $validator = Validation::createValidator();
         $errors = $validator->validate($longUrl, new Url());
@@ -33,18 +36,15 @@ class UrlController extends AbstractController
         }
 
         $urlMapping = $entityManager->getRepository(UrlMapping::class)->findOneBy(['longUrl' => $longUrl]);
-    
-        if ($urlMapping) {
-            
-           $shortUrl = $this->generateShortUrl($urlMapping->getShortCode());
-        } else {
-           
-            $shortCode = $this->generateShortCode();   
 
+        if ($urlMapping) {
+
+            $shortUrl = $this->generateShortUrl($urlMapping->getShortCode());
+        } else {
+
+            $shortCode = $this->generateShortCode();
             $token = $tokenStorage->getToken();
             $currentUser = $token->getUser();
-
-
             $urlMapping = new UrlMapping();
             $urlMapping->setLongUrl($longUrl);
             $urlMapping->setShortCode($shortCode);
@@ -53,7 +53,7 @@ class UrlController extends AbstractController
             $entityManager->persist($urlMapping);
             $entityManager->flush();
 
-            $shortUrl = $this->generateShortUrl( $shortCode);
+            $shortUrl = $this->generateShortUrl($shortCode);
         }
 
         return new JsonResponse([
@@ -62,17 +62,18 @@ class UrlController extends AbstractController
     }
 
     #[Route('/success', name: 'app_success', methods: ['GET'])]
-    public function success(Request $reguest) {
-         return $this->render('index/shortUrl.html.twig', [
+    public function success(Request $reguest)
+    {
+        return $this->render('index/shortUrl.html.twig', [
             'shortUrl' => $reguest->get('link'),
         ]);
     }
-    
+
     #[Route('/go-{shortCode}', name: 'app_redirect', methods: ['GET'])]
     public function redirectLink(Request $request, string $shortCode, UrlMappingRepository $urlMappingRepository)
     {
         $shortCode = $request->get('shortCode');
-        
+
         $urlMapping = $urlMappingRepository->findOneBy(['shortCode' => $shortCode]);
         if ($urlMapping) {
             $clicks = $urlMapping->getClickCount() ?? 0;
@@ -83,33 +84,33 @@ class UrlController extends AbstractController
             return $this->redirect($urlMapping->getLongUrl());
         }
 
-        
+
         return new Response('Страница не найдена', Response::HTTP_NOT_FOUND);
     }
 
     private function generateShortCode($length = 10)
     {
         $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    $shortCode = '';
-    
-    $max = strlen($characters) - 1;
-    for ($i = 0; $i < $length; $i++) {
-        $shortCode .= $characters[random_int(0, $max)];
-    }
-    
-    return $shortCode;
+        $shortCode = '';
+
+        $max = strlen($characters) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $shortCode .= $characters[random_int(0, $max)];
+        }
+
+        return $shortCode;
     }
 
-    
+
     private function generateShortUrl(string $shortCode)
     {
-        
-        
-        return $this->generateUrl('app_redirect',['shortCode' => $shortCode], UrlGeneratorInterface::ABSOLUTE_URL);
+
+
+        return $this->generateUrl('app_redirect', ['shortCode' => $shortCode], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
     //выводит все ссылки для admin пользователя
-    #[Route('/url', name: 'url_show', methods: ['GET'])] 
+    #[Route('/url', name: 'url_show', methods: ['GET'])]
     public function getAllUrl(UrlMappingRepository $urlMappingRepository)
     {
 
@@ -118,21 +119,15 @@ class UrlController extends AbstractController
         ]);
     }
     //выводит ссылки для user пользователя
-    
-    #[Route('/url-user', name: 'url_show_user', methods: ['GET'])] 
-   public function userUrl()
-   {
-       // Получаем текущего пользователя
-       /** @var User $user */
-       $user = $this->getUser();
-       $url = $user ->getUrlMapping();
 
-           return $this->render('index/currentUserUrl.html.twig', [
-               'userUrl' => $url,
-           ]);
-      
-   }
-    
-   
-    
+    #[Route('/url-user', name: 'url_show_user', methods: ['GET'])]
+    public function userUrl()
+    {
+        // Получаем текущего пользователя
+        /** @var User $user */
+        $user = $this->getUser();
+        $links = $user->getUrlMapping();
+
+        return $this->json(['links' => $links,], context: ['groups' => ['api']]);
+    }
 }
