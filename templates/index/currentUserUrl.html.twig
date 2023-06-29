@@ -7,7 +7,7 @@
 $(document).ready(function() {
     // Запрос к API для получения JSON данных
     $.ajax({
-      url: 'http://127.0.0.1:8000/url-user', // Замените на ваш URL API
+      url: '/url-user', // Замените на ваш URL API
       method: 'GET',
       dataType: 'json',
       success: function(response) {
@@ -26,7 +26,8 @@ $(document).ready(function() {
         // Вставляем HTML на страницу
         $('#link-list').html(linkListHTML);
       },
-      error: function() {
+      error: function(res) {
+        console.log(res.responseJSON);
         // Обработка ошибок
         alert('Ошибка при получении данных');
       }
