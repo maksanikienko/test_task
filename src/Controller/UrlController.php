@@ -110,15 +110,14 @@ class UrlController extends AbstractController
 
     //выводит все ссылки для admin пользователя
     #[Route('/admin/url', name: 'url_show', methods: ['GET'])]
-    public function getAllUrl(UrlMappingRepository $urlMappingRepository): Response
+    public function getAllUrl(UrlMappingRepository $urlMappingRepository): JsonResponse
     {
-        return $this->render('admin/urlMapping/index.html.twig', [
-            'allUrl' => $urlMappingRepository->findAll(),
-        ]);
+        $allLinks = $urlMappingRepository->findAll();
+
+        return $this->json(['allLinks' => $allLinks,], context: ['groups' => ['api']]);
     }
 
-    //выводит ссылки для user пользователя
-
+    //возвращает json для api
     #[Route('/api/current-user/links', name: 'url_show_user', methods: ['GET'])]
     public function userUrl(): JsonResponse
     {
@@ -129,11 +128,11 @@ class UrlController extends AbstractController
 
         return $this->json(['links' => $links,], context: ['groups' => ['api']]);
     }
-
-
-    #[Route('/user/links', name: 'contact')]
+    
+    //вкладка контакты
+    #[Route('/user/contact', name: 'contact')]
     public function contact(): Response
     {
-        return $this->render('index/currentUserUrl.html.twig');
+        return $this->render('index/contact.html.twig');
     }
 }

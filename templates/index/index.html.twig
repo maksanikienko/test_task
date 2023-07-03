@@ -7,4 +7,19 @@
     </div>
     <button type="submit" class="btn btn-primary">Сократить</button>
 </form>
-{% endblock %}
+
+    {#вывод для текущего пользователя#}
+        {% if is_granted('ROLE_USER') %}
+            <dvi class="container">
+                <div id="link-list"></div>
+            </div>
+        {% endif %}
+
+    {#если текущий пользователь admin#}
+        {% if is_granted('ROLE_ADMIN')  %}
+            <dvi class="container">
+                <div id="admin-link-list"></div>
+            </div>
+        {% endif %}
+
+    {% endblock %}

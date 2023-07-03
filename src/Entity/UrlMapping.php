@@ -19,7 +19,8 @@ class UrlMapping
     #[Groups(['api'])]
     #[ORM\Column(length: 255)]
     private ?string $longUrl = null;
-
+    
+    #[Groups(['api'])]
     #[ORM\Column(length: 10,unique:true)]
     private ?string $shortCode = null;
 
