@@ -24,10 +24,10 @@ xhr.onload = function () {
     
     var html = $('#link-list');
     for (var i = 0; i < data.length; i++) {
-      var row = '<ul>' +
-     '<li>'+'LongUrl ' + '<a href="">'+ data[i].longUrl  + '</a>' + '</li>' + 
-      '<li>' + 'ClickCount ' + data[i].clickCount + '</li>' +
-                '</ul>';
+      var row ='<div class="container container my-4">' + '<ul class="list-group">' +
+     '<li class="list-group-item">'+'Link: ' + '<a href="/go-{shortCode}" class="text-decoration-none Link--secondary">'+ data[i].longUrl  + '</a>' + '</li>' + 
+      '<li class="list-group-item">' + 'Click Count: ' + data[i].clickCount + '</li>' +
+                '</ul>' + '</div>';
                 html.append(row);  
     }
   }
@@ -47,14 +47,14 @@ $(document).ready(function() {
       
       if (xhr.status === 200) {
         
-        var data = JSON.parse(xhr.responseText).links;
-        console.log(xhr.responseText);
+        var data = JSON.parse(xhr.responseText).allLinks;
+        console.log(data );
         var html = $('#admin-link-list');
         for (var i = 0; i < data.length; i++) {
-          var row = '<ul>' +
-         '<li>'+'LongUrl ' + '<a href="/go-{shortCode}">'+ data[i].longUrl  + '</a>' + '</li>' + 
-          '<li>' + 'ClickCount ' + data[i].clickCount + '</li>' +
-                    '</ul>';
+          var row = '<div class="container container my-4">' + '<ul class="list-group">' +
+         '<li class="list-group-item">'+'Link: ' + '<a href="/go-{shortCode}" class="text-decoration-none Link--secondary">'+ data[i].longUrl  + '</a>' + '</li>' + 
+          '<li class="list-group-item">' + 'Click Count: ' + data[i].clickCount + '</li>' +
+                    '</ul>' + '</div>';
                     html.append(row);  
         }
       }
