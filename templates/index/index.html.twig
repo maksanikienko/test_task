@@ -1,25 +1,23 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-<h1 class="text-center">Сокращение ссылок</h1>
-<form action="/shorten" method="POST" id="shorten">
-    <div class="mb-3">
-        <input type="text" name="longUrl" class="form-control" placeholder="Введите URL для сокращения" required>
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-md-6">
+            <h1>Link shortener</h1>
+            <form action="{{ path('app_shorten') }}" method="POST" id="shorten">
+                <div class="mb-3">
+                    <input type="text" name="longUrl" class="form-control" placeholder="URL to shorten" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Shorten</button>
+            </form>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">Сократить</button>
-</form>
-
-    {#вывод для текущего пользователя#}
-        {% if is_granted('ROLE_USER') %}
-            
-                <div id="link-list"></div>
-           
-        {% endif %}
-
-    {#если текущий пользователь admin#}
-        {% if is_granted('ROLE_ADMIN')  %}
-            
-                <div id="admin-link-list"></div>
-          
-        {% endif %}
-
-    {% endblock %}
+    <table class="table" id="link-list">
+        <thead>
+            <tr>
+                <th>Link</th>
+                <th>Owner</th>
+                <th>Click counter</th>
+            </tr>
+        </thead>
+    </table>
+{% endblock %}
