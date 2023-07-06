@@ -18,23 +18,23 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
+                {% if (is_granted('ROLE_ADMIN')) %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_user_index') }}">Admin Panel</a>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('about') }}" >About</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('contact') }}">Contact</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_user_index') }}">Admin Panel</a>
-                </li>
-                
-                
             </ul>
         </div>
          <div class="col-4">
                 <div class="d-flex align-items-center justify-content-end">
                     {% if app.user %}
-                        <div class="text-light me-3">Вы вошли как <b>{{ app.user.email }}</b></div>
+                        <div class="text-light me-3">You are logged in as <b>{{ app.user.email }}</b></div>
                         <a class="btn rounded-pill bg-light text-black" href="{{ path('app_logout') }}">Logout</a>
                     {% else %}
                         <a class="btn rounded-pill bg-light text-black" href="{{ path('app_login') }}">Login</a>
