@@ -31,11 +31,11 @@ class UserController extends AbstractController
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
     public function new(Request $request, UserRepository $userRepository): Response
     {
-        $user = new User();
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(UserType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
             $user->setPassword(
                 $this->userPasswordHasher->hashPassword($user, $form->get('password')->getData())
             );
@@ -45,7 +45,6 @@ class UserController extends AbstractController
         }
 
         return $this->renderForm('admin/user/new.html.twig', [
-            'user' => $user,
             'form' => $form,
         ]);
     }

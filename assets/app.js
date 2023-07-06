@@ -1,14 +1,15 @@
 $(document).ready(function () {
     $('#shorten').submit(function (e) {
-        let form = e.target;
+        const form = e.target;
+        const field = form.querySelector('[name="longUrl"]');
         e.preventDefault();
         $.post(form.action, $(this).serialize())
-            .done(function(res) {
+            .done(function (res) {
+                field.value = '';
                 loadLinks();
             })
-            .fail(function(err) {
+            .fail(function (err) {
                 const errors = err.responseJSON.errors;
-                const field = form.querySelector('[name="longUrl"]');
                 field.setCustomValidity(errors.map((e) => e.message).join("\n"))
                 field.reportValidity();
                 setTimeout(() => {
@@ -23,21 +24,26 @@ $(document).ready(function () {
 $(document).ready(loadLinks);
 
 function loadLinks() {
+    const $html = $('#link-list');
+    if ($html.length === 0) {
+        return; // because there is no container to which to load links
+    }
+    $html.find('tbody')?.remove();
+    const $tbody = $(document.createElement('tbody'));
+
     const xhr = new XMLHttpRequest();
+    $.get("/api/links")
+        .done((res) => {
+            const data = res.responseJSON?.links;
 
-    const url = "/api/links";
+            if(!res.responseJSON || data.length === 0){
+                $tbody.append(`<tr class="text-center">
+                    <td colspan="3">Cannot load your links. Please contact support.</td>
+                </tr>`)
+                $html.append($tbody);
+                return;
+            }
 
-    xhr.open("GET", url, true);
-
-    xhr.onload = function () {
-
-        if (xhr.status === 200) {
-
-            const data = JSON.parse(xhr.responseText).links;
-
-            const html = $('#link-list');
-            html.html('');
-            const $tbody = $(document.createElement('tbody'));
             for (let i = 0; i < data.length; i++) {
                 let link = data[i];
                 $tbody.append(`<tr>
@@ -46,8 +52,12 @@ function loadLinks() {
                     <td>${link.clickCount}</td>
                 </tr>`)
             }
-            html.append($tbody);
-        }
-    }
-    xhr.send();
+            $html.append($tbody);
+
+        })
+        .fail(() => {
+            $tbody.append(`<tr class="text-center"> <td colspan="3">Cannot load your links. Please contact support.</td></tr>`)
+            $html.append($tbody);
+        })
+    ;
 }
