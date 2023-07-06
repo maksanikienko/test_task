@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UrlMappingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: UrlMappingRepository::class)]
 #[ORM\Table(name:"url_mappings")]
@@ -71,6 +72,13 @@ class UrlMapping
         $this->clickCount = $clickCount;
 
         return $this;
+    }
+
+    #[SerializedName('owner')]
+    #[Groups(['api'])]
+    public function getOwner(): string
+    {
+        return $this->client->getEmail();
     }
 
     public function getClient(): ?User

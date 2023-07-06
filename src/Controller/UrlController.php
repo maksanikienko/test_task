@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Url;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,7 +35,12 @@ class UrlController extends AbstractController
         $errors = $validator->validate($longUrl, new Url());
 
         if (count($errors) > 0) {
-            return new Response('Невалидный URL', Response::HTTP_BAD_REQUEST);
+            return new JsonResponse([
+                'errors' => array_map(fn(ConstraintViolation $violation) => [
+                    'code' => $violation->getCode(),
+                    'message' => $violation->getMessage(),
+                ], iterator_to_array($errors))
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $urlMapping = $entityManager->getRepository(UrlMapping::class)->findOneBy(['longUrl' => $longUrl]);
@@ -108,27 +114,23 @@ class UrlController extends AbstractController
         return $this->generateUrl('app_redirect', ['shortCode' => $shortCode], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
-    //выводит все ссылки для admin пользователя
-    #[Route('/admin/url', name: 'url_show', methods: ['GET'])]
-    public function getAllUrl(UrlMappingRepository $urlMappingRepository): JsonResponse
-    {
-        $allLinks = $urlMappingRepository->findAll();
-
-        return $this->json(['allLinks' => $allLinks,], context: ['groups' => ['api']]);
-    }
-
     //возвращает json для api
-    #[Route('/api/current-user/links', name: 'url_show_user', methods: ['GET'])]
-    public function userUrl(): JsonResponse
+    #[Route('/api/links', name: 'api_links', methods: ['GET'])]
+    public function links(UrlMappingRepository $repository): JsonResponse
     {
         // Получаем текущего пользователя
         /** @var User $user */
         $user = $this->getUser();
-        $links = $user->getUrlMapping();
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $links = $repository->findBy([], orderBy: ['id' => 'DESC']);
+        } else {
+            $links = $user->getUrlMapping()->toArray();
+            usort($links, fn(UrlMapping $a, UrlMapping $b) => $a->getId() < $b->getId());
+        }
 
         return $this->json(['links' => $links,], context: ['groups' => ['api']]);
     }
-    
+
     //вкладка контакты
     #[Route('/user/contact', name: 'contact')]
     public function contact(): Response

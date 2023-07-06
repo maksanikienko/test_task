@@ -1,63 +1,53 @@
-
 $(document).ready(function () {
     $('#shorten').submit(function (e) {
+        let form = e.target;
         e.preventDefault();
-        $.post('/user/shorten', $(this).serialize(), function (res) {
-            document.location.href = '/success?link=' + res.shortUrl;
-        });
+        $.post(form.action, $(this).serialize())
+            .done(function(res) {
+                loadLinks();
+            })
+            .fail(function(err) {
+                const errors = err.responseJSON.errors;
+                const field = form.querySelector('[name="longUrl"]');
+                field.setCustomValidity(errors.map((e) => e.message).join("\n"))
+                field.reportValidity();
+                setTimeout(() => {
+                    field.setCustomValidity("")
+                    field.reportValidity();
+                }, 1500);
+            });
     });
-});
-
-//{#если текущий пользователь user#}
-$(document).ready(function() {
-var xhr = new XMLHttpRequest();
-
-var url = "http://127.0.0.1:8000/api/current-user/links";
-
-xhr.open("GET", url, true);
-
-xhr.onload = function () {
-  
-  if (xhr.status === 200) {
-    
-    var data = JSON.parse(xhr.responseText).links;
-    
-    var html = $('#link-list');
-    for (var i = 0; i < data.length; i++) {
-      var row ='<div class="container container my-4">' + '<ul class="list-group">' +
-     '<li class="list-group-item">'+'Link: ' + '<a href="/go-{shortCode}" class="text-decoration-none Link--secondary">'+ data[i].longUrl  + '</a>' + '</li>' + 
-      '<li class="list-group-item">' + 'Click Count: ' + data[i].clickCount + '</li>' +
-                '</ul>' + '</div>';
-                html.append(row);  
-    }
-  }
-}
-xhr.send();
 });
 
 //{#если текущий пользователь admin#}
-$(document).ready(function() {
-    var xhr = new XMLHttpRequest();
-    
-    var url = "http://127.0.0.1:8000/admin/url";
-    
+$(document).ready(loadLinks);
+
+function loadLinks() {
+    const xhr = new XMLHttpRequest();
+
+    const url = "/api/links";
+
     xhr.open("GET", url, true);
-    
+
     xhr.onload = function () {
-      
-      if (xhr.status === 200) {
-        
-        var data = JSON.parse(xhr.responseText).allLinks;
-        console.log(data );
-        var html = $('#admin-link-list');
-        for (var i = 0; i < data.length; i++) {
-          var row = '<div class="container container my-4">' + '<ul class="list-group">' +
-         '<li class="list-group-item">'+'Link: ' + '<a href="/go-{shortCode}" class="text-decoration-none Link--secondary">'+ data[i].longUrl  + '</a>' + '</li>' + 
-          '<li class="list-group-item">' + 'Click Count: ' + data[i].clickCount + '</li>' +
-                    '</ul>' + '</div>';
-                    html.append(row);  
+
+        if (xhr.status === 200) {
+
+            const data = JSON.parse(xhr.responseText).links;
+
+            const html = $('#link-list');
+            html.html('');
+            const $tbody = $(document.createElement('tbody'));
+            for (let i = 0; i < data.length; i++) {
+                let link = data[i];
+                $tbody.append(`<tr>
+                    <td><a target="_blank" href="/go-${link.shortCode}" class="text-decoration-none link--secondary">${link.longUrl}</a></td>
+                    <td>${link.owner}</td>
+                    <td>${link.clickCount}</td>
+                </tr>`)
+            }
+            html.append($tbody);
         }
-      }
     }
     xhr.send();
-    });
+}
